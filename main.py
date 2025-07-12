@@ -1,33 +1,35 @@
 import pandas as pd
+import numpy as np
 import calendar as cal
 
-pd.set_option('display.max_columns', None)
+pd.set_option('display.max_rows', None)        # Show all rows
+pd.set_option('display.max_columns', None)     # Show all columns
+pd.set_option('display.width', None)           # Don't wrap lines
+pd.set_option('display.max_colwidth', None)    # Show full content in cells
+
+def accountColumns(originFrame, newFrame):
+    for tag in originFrame['Tag'].drop_duplicates().tolist():
+        for location in originFrame['Location'].drop_duplicates().tolist():
+            originFrame[f'{location} {tag}'] = np.where(originFrame['Tag'] == tag, np.where(originFrame['Location'] == location, originFrame['Amount'], 0), 0)
+            spent = originFrame.groupby('DateOnly')[f'{location} {tag}'].sum().reset_index()
+            newFrame = newFrame.merge(spent, left_on='Dates', right_on='DateOnly', how='left')
+        originFrame[tag] = np.where(originFrame['Tag'] == tag, originFrame['Amount'], 0)
+        newFrame = newFrame.drop(columns=['DateOnly_x', 'DateOnly_y'])
+    return newFrame
 
 def main():
-    expenses = pd.read_csv('./data/expenses.csv')
-    expenses.fillna(0, inplace=True)
-    expenses['Date'] = pd.to_datetime(expenses['Date'])
+    expensesFile = pd.read_csv('./data/expensesV2.csv')
+    expensesFile['Dates'] = pd.to_datetime(expensesFile['Dates'])
+    expensesFile['DateOnly'] = expensesFile['Dates'].dt.date
+    expenses = pd.DataFrame({'Dates': expensesFile['DateOnly'].drop_duplicates().reset_index(drop=True)})
 
-    # Get account difference
-    expenses['Account1'] = expenses['Income1'].cumsum() - expenses['Spent1'].cumsum()
-    expenses['Account2'] = expenses['Income2'].cumsum() - expenses['Spent2'].cumsum()
+    expenses = accountColumns(expensesFile, expenses)
 
-    # Get totals
-    expenses['TotalIncome'] = expenses['Income1'] + expenses['Income2']
-    expenses['TotalSpent'] = expenses['Spent1'] + expenses['Spent2']
-    expenses['TotalAccount'] = expenses['Account1'] + expenses['Account2']
+    # Accounts
+    for location in expensesFile['Location'].drop_duplicates().tolist():
+        expenses[f'{location} Account'] = expenses[f'{location} Earned'].cumsum() + expenses[f'{location} Spent'].cumsum() + expenses[f'{location} Transfer'].cumsum()
 
-    # Per month
-    months = pd.DataFrame({'Month': expenses['Date'].dt.month.drop_duplicates().sort_values().reset_index(drop=True)})
-    for i in expenses.columns.tolist():
-        if i != 'Date':
-            if i in ['TotalAccount','Account1','Account2']:
-                newColumn = expenses.groupby(expenses['Date'].dt.month)[i].last()
-                months = pd.merge(months, newColumn, left_on='Month', right_on='Date', how='left')
-            else:
-                newColumn = expenses.groupby(expenses['Date'].dt.month)[i].sum()
-                months = pd.merge(months, newColumn, left_on='Month', right_on='Date', how='left')
-    months['Month'] = months['Month'].apply(lambda x: cal.month_abbr[x])
+    print(expenses)
 
 if __name__ == "__main__":
     main()
