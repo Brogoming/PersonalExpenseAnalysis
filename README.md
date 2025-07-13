@@ -14,10 +14,10 @@ Whether you're budgeting for the first time or trying to improve your financial 
 - [x] Initialize Git repo and create `README.md`
 
 ### 📊 Milestone 2: Expense Data Handling
-- [ ] Define a standard CSV format or accept user-uploaded data
-- [ ] Use Pandas to read, clean, and categorize expenses
-- [ ] Summarize expenses by category and month
-- [ ] Implement handling for missing or malformed data
+- [x] Define a standard CSV format or accept user-uploaded data
+- [x] Use Pandas to read, clean, and categorize expenses
+- [x] Summarize expenses by category and month
+- [x] Implement handling for missing or malformed data
 
 ### 📈 Milestone 3: Visualizations
 - [ ] Line chart of monthly expenses over time
