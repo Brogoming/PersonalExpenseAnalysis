@@ -10,13 +10,14 @@ def cleanData(originFrame):
     """
     cleanFrame = originFrame.copy()
     for i in cleanFrame.columns.tolist():
-        if cleanFrame[i].dtype == 'int64[pyarrow]' or cleanFrame[i].dtype == 'double[pyarrow]':
+        if pd.api.types.is_numeric_dtype(cleanFrame[i]):
             cleanFrame[i] = cleanFrame[i].fillna(0)
         else:
             cleanFrame[i] = cleanFrame[i].fillna('')
 
-    cleanFrame['Amount'] = np.where(originFrame['Tag'] == 'Spent', np.where(originFrame['Amount'] > 0, -originFrame['Amount'], originFrame['Amount']), originFrame['Amount'])
-    cleanFrame['Amount'] = np.where(originFrame['Tag'] == 'Earned', np.where(originFrame['Amount'] < 0, -originFrame['Amount'], originFrame['Amount']), originFrame['Amount'])
+    cleanFrame['Amount'] = originFrame['Amount']
+    cleanFrame['Amount'] = np.where( originFrame['Tag'] == 'Spent', -abs( cleanFrame['Amount'] ), cleanFrame['Amount'] )
+    cleanFrame['Amount'] = np.where( originFrame['Tag'] == 'Earned', abs( cleanFrame['Amount'] ), cleanFrame['Amount'] )
     return cleanFrame
 
 def getExpenses(originFrame):
@@ -27,12 +28,16 @@ def getExpenses(originFrame):
     """
     newFrame = pd.DataFrame( { 'Dates': originFrame['Dates'].drop_duplicates().reset_index( drop = True ) } )
 
-    for tag in ['Earned', 'Spent', 'Transfer']:
-        for location in originFrame['Location'].drop_duplicates().tolist():
-            originFrame[f'{location} {tag}'] = np.where(originFrame['Tag'] == tag, np.where(originFrame['Location'] == location, originFrame['Amount'], 0), 0)
-            spent = originFrame.groupby('Dates')[f'{location} {tag}'].sum().reset_index()
-            newFrame = newFrame.merge(spent, on='Dates', how='left')
-        originFrame[tag] = np.where(originFrame['Tag'] == tag, originFrame['Amount'], 0)
+    tags = ['Earned', 'Spent', 'Transfer']
+    locations = originFrame['Location'].drop_duplicates()
+
+    for tag in tags:
+        for location in locations:
+            col = f'{location} {tag}'
+            originFrame[col] = np.where( (originFrame['Tag'] == tag) & (originFrame['Location'] == location),
+                originFrame['Amount'], 0 )
+            grouped = originFrame.groupby( 'Dates' )[col].sum().reset_index()
+            newFrame = newFrame.merge( grouped, on = 'Dates', how = 'left' )
 
     # Accounts totals per date
     for location in originFrame['Location'].drop_duplicates().tolist():
@@ -50,9 +55,8 @@ def getMonthlyExpenses(originFrame):
         if i != 'Dates':
             if "Account" in i:
                 newColumn = originFrame.groupby(pd.to_datetime(originFrame['Dates']).dt.month)[i].last()
-                months = pd.merge(months, newColumn, left_on='Month', right_on='Dates', how='left')
             else:
                 newColumn = originFrame.groupby(pd.to_datetime(originFrame['Dates']).dt.month)[i].sum()
-                months = pd.merge(months, newColumn, left_on='Month', right_on='Dates', how='left')
+            months = pd.merge(months, newColumn, left_on='Month', right_on='Dates', how='left')
     months['Month'] = months['Month'].apply(lambda x: cal.month_abbr[x])
     return months.reset_index(drop=True)
