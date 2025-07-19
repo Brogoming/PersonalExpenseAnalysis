@@ -1,6 +1,7 @@
 import pandas as pd
 import numpy as np
 import calendar as cal
+from datetime import datetime
 
 def cleanData(originFrame):
     """
@@ -9,11 +10,12 @@ def cleanData(originFrame):
     :return: A modified version of the original data frame
     """
     cleanFrame = originFrame.copy()
+
     for i in cleanFrame.columns.tolist():
         if pd.api.types.is_numeric_dtype(cleanFrame[i]):
             cleanFrame[i] = cleanFrame[i].fillna(0)
         else:
-            cleanFrame[i] = cleanFrame[i].fillna('')
+            cleanFrame[i] = cleanFrame[i].fillna('Unknown')
 
     cleanFrame['Amount'] = originFrame['Amount']
     cleanFrame['Amount'] = np.where( originFrame['Tag'] == 'Spent', -abs( cleanFrame['Amount'] ), cleanFrame['Amount'] )
@@ -28,6 +30,13 @@ def getExpenses(originFrame):
     """
     newFrame = pd.DataFrame( { 'Dates': originFrame['Dates'].drop_duplicates().reset_index( drop = True ) } )
 
+    # Get missing dates
+    startYear = pd.to_datetime( originFrame["Dates"] ).dt.year[0] # gets the year the data started
+    endYear = pd.to_datetime( originFrame["Dates"] ).dt.year[len(originFrame["Dates"]) - 1]  # gets the year the data ended
+    missingDates = pd.DataFrame( { 'Dates': pd.date_range( f'01-01-{startYear}', f'12-31-{endYear}').difference(newFrame['Dates']) } )
+    missingDates['Dates'] = pd.to_datetime(missingDates['Dates']).dt.date
+    newFrame = pd.concat( [newFrame, missingDates] ).sort_values('Dates').reset_index( drop = True )
+
     tags = ['Earned', 'Spent', 'Transfer']
     locations = originFrame['Location'].drop_duplicates()
 
@@ -39,24 +48,39 @@ def getExpenses(originFrame):
             grouped = originFrame.groupby( 'Dates' )[col].sum().reset_index()
             newFrame = newFrame.merge( grouped, on = 'Dates', how = 'left' )
 
-    # Accounts totals per date
+    # Clean up data
+    newFrame = newFrame.fillna(0)
+
+    # Account totals per date
     for location in originFrame['Location'].drop_duplicates().tolist():
         newFrame[f'{location} Account'] = newFrame[f'{location} Earned'].cumsum() + newFrame[f'{location} Spent'].cumsum() + newFrame[f'{location} Transfer'].cumsum()
+
     return newFrame
 
-def getMonthlyExpenses(originFrame):
+def getIncomeData(originFrame):
     """
-    Group data by month
-    :param originFrame: The frame data is coming from
-    :return: New monthly expense data frame
+    Gets the different types of income earned
+    :param originFrame: The frame where the imported data is coming from
+    :return: A new dataframe with the different types of income spread out
     """
-    months = pd.DataFrame({'Month': pd.to_datetime(originFrame['Dates']).dt.month.drop_duplicates().sort_values().reset_index(drop=True)})
-    for i in originFrame.columns.tolist():
-        if i != 'Dates':
-            if "Account" in i:
-                newColumn = originFrame.groupby(pd.to_datetime(originFrame['Dates']).dt.month)[i].last()
-            else:
-                newColumn = originFrame.groupby(pd.to_datetime(originFrame['Dates']).dt.month)[i].sum()
-            months = pd.merge(months, newColumn, left_on='Month', right_on='Dates', how='left')
-    months['Month'] = months['Month'].apply(lambda x: cal.month_abbr[x])
-    return months.reset_index(drop=True)
+    newFrame = pd.DataFrame( { 'Dates': originFrame['Dates'].drop_duplicates().reset_index( drop = True ) } )
+    filteredRows = originFrame[originFrame['Tag'] == 'Income']
+    optionalTags = filteredRows['Optional Tag'].drop_duplicates()
+    for tag in optionalTags:
+        newFrame[tag] = np.where((originFrame['Tag'] == 'Income') & (filteredRows['Optional Tag'] == tag), originFrame['Amount'], 0 )
+
+    return newFrame
+
+def getSpentData(originFrame):
+    """
+    Gets the different types of expenditures
+    :param originFrame: The frame where the imported data is coming from
+    :return: A new dataframe with the different types of expenditures spread out
+    """
+    newFrame = pd.DataFrame( { 'Dates': originFrame['Dates'].drop_duplicates().reset_index( drop = True ) } )
+    filteredRows = originFrame[originFrame['Tag'] == 'Spent']
+    optionalTags = filteredRows['Optional Tag'].drop_duplicates()
+    for tag in optionalTags:
+        newFrame[tag] = np.where((originFrame['Tag'] == 'Spent') & (originFrame['Optional Tag'] == tag), originFrame['Amount'], 0 )
+
+    return newFrame

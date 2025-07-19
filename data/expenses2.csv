@@ -1,0 +1,26 @@
+Dates,Amount,Tag,Optional Tag,Location
+1/1/2025,94,Earned,Work,Checking
+1/2/2025,58,Earned,Work,Savings
+1/3/2025,57,Earned,Work,Savings
+1/4/2025,12,Earned,Work,Savings
+1/5/2025,31,Earned,Work,Savings
+1/6/2025,25,Earned,Work,Checking
+1/8/2025,92,Earned,Work,Checking
+1/11/2025,29,Earned,Work,Checking
+1/12/2025,-49,Spent,Groceries,Savings
+1/13/2025,1,Earned,Work,Savings
+1/15/2025,31,Earned,Work,Savings
+1/16/2025,-44,Spent,Groceries,Savings
+1/17/2025,-19,Spent,Groceries,Savings
+1/18/2025,0,Spent,Groceries,Checking
+1/20/2025,49,Earned,Work,Savings
+1/21/2025,5,Earned,Work,Savings
+1/22/2025,25,Earned,Work,Savings
+1/23/2025,89,Earned,Work,Checking
+1/25/2025,75,Earned,Work,Checking
+1/26/2025,17,Earned,Work,Savings
+1/27/2025,12,Earned,Work,Checking
+1/28/2025,47,Earned,Work,Savings
+1/29/2025,46,Earned,Work,Savings
+1/30/2025,-40,Spent,Groceries,Checking
+1/31/2026,16,Earned,Work,Checking

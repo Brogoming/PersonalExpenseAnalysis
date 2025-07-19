@@ -20,8 +20,8 @@ Whether you're budgeting for the first time or trying to improve your financial 
 - [x] Implement handling for missing or malformed data
 
 ### 📈 Milestone 3: Visualizations
-- [ ] Line chart of monthly expenses over time
-- [ ] Pie chart of spending by category
+- [x] Line chart of monthly expenses over time
+- [ ] Pie charts of spending and income by category
 - [ ] Bar chart comparing months/categories
 
 ### 🔮 Milestone 4: Expense Forecasting

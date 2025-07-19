@@ -1,6 +1,7 @@
 import pandas as pd
 import os
-from formatData import getMonthlyExpenses, cleanData, getExpenses
+from formatData import cleanData, getExpenses, getIncomeData, getSpentData
+from plotData import plotAccounts
 
 pd.set_option('display.max_rows', None)        # Show all rows
 pd.set_option('display.max_columns', None)     # Show all columns
@@ -27,23 +28,39 @@ def promptForDataFile():
 
     return os.path.join(dataDir, dataFiles[int(userInput)])
 
+def plotOptions(originFrame):
+    print('\nPlot Data: \nAccounts Overtime = 0\nIncome Overtime = 1\nSpent Overtime = 2')
+    userInput = input( 'Type index number: ' )
+
+    while not userInput.isdigit() or not (0 <= int( userInput ) < 3):
+        userInput = input( f'Invalid Response, try again: ' )
+
+    userInput = int(userInput)
+    if userInput == 0:  # Accounts Overtime
+        expenses = getExpenses( originFrame )  # formats and cleans the expenses table
+        plotAccounts( expenses )
+    elif userInput == 1:  # Income Overtime
+        incomeDate = getIncomeData(originFrame) # formats and cleans the income table
+        pass
+    elif userInput == 2:  # Spent Overtime
+        spentData = getSpentData(originFrame) # formats and cleans the spent table
+        pass
+
 def main():
     while True:
         fileName = promptForDataFile()
 
         try:
             expensesFile = pd.read_csv( fileName, engine = 'pyarrow', dtype_backend = 'pyarrow' )
-            expensesFile['Dates'] = pd.to_datetime( expensesFile['Dates'] ).dt.date
+            expensesFile['Dates'] = pd.to_datetime( expensesFile['Dates']).dt.date
             expensesFile = cleanData( expensesFile )
         except Exception as e:
             print( f"Failed to load and clean file: {e}" )
             continue
 
-        expenses = getExpenses(expensesFile)
-        monthlyExpenses = getMonthlyExpenses(expenses)
-        print(monthlyExpenses)
+        plotOptions(expensesFile)
 
-        userInput = input('Do you want to analyze another file (yes/no)? ').lower()
+        userInput = input('\nDo you want to analyze another file (yes/no)? ').lower()
         while userInput not in ['yes', 'no']:
             userInput = input(f'Invalid Response, try again: ')
 
