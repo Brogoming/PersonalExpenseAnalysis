@@ -1,7 +1,7 @@
 import pandas as pd
 import os
-from formatData import cleanData, getExpenses, getIncomeData, getSpentData
-from plotData import plotAccounts
+from formatData import cleanData, getExpenses, getEarnedData, getSpentData
+from plotData import pieBar, plotAccounts
 
 pd.set_option('display.max_rows', None)        # Show all rows
 pd.set_option('display.max_columns', None)     # Show all columns
@@ -36,17 +36,24 @@ def plotOptions(originFrame):
         userInput = input( f'Invalid Response, try again: ' )
 
     userInput = int(userInput)
-    if userInput == 0:  # Accounts Overtime
-        expenses = getExpenses( originFrame )  # formats and cleans the expenses table
-        plotAccounts( expenses )
-    elif userInput == 1:  # Income Overtime
-        incomeDate = getIncomeData(originFrame) # formats and cleans the income table
-        pass
-    elif userInput == 2:  # Spent Overtime
-        spentData = getSpentData(originFrame) # formats and cleans the spent table
-        pass
+    try:
+        if userInput == 0:  # Accounts Overtime
+            expenses = getExpenses( originFrame )  # formats and cleans the expenses table
+            plotAccounts( expenses )
+        elif userInput == 1:  # Income Overtime
+            earnedDate = getEarnedData(originFrame) # formats and cleans the income table
+            pieBar( earnedDate, 'Income' )
+        elif userInput == 2:  # Spent Overtime
+            spentData = getSpentData(originFrame) # formats and cleans the spent table
+            pieBar( spentData, 'Spent' )
+    except Exception as e:
+        print( f"Failed to load and plot the data: {e}" )
 
 def main():
+    """
+    Runs the main process
+    :return: void
+    """
     while True:
         fileName = promptForDataFile()
 
