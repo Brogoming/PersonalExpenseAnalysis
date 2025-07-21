@@ -25,21 +25,14 @@ Whether you're budgeting for the first time or trying to improve your financial 
 - [x] Bar chart comparing months/categories for spending and income
 
 ### 🔮 Milestone 4: Expense Forecasting
-- [ ] Use moving averages or linear regression to predict next month’s expenses
-- [ ] Display predicted totals and category-wise predictions
-- [ ] Add confidence intervals or error bounds
+- [x] Use moving averages or linear regression to predict next month’s expenses
 
-### ✂️ Milestone 5: Cutback Suggestions
-- [ ] Identify top categories contributing to high spending
-- [ ] Suggest target reductions based on past data trends
-- [ ] Display "what-if" scenarios (e.g., if dining out was reduced by 20%)
-
-### 💾 Milestone 6: User Interface & Experience
+### 💾 Milestone 5: User Interface & Experience
 - [ ] Build a simple CLI or GUI (e.g., Streamlit or Tkinter)
 - [ ] Allow importing new data without overwriting old analysis
 - [ ] Add export to PDF or CSV for reports
 
-### 🧪 Milestone 7: Testing and Final Touches
+### 🧪 Milestone 6: Testing and Final Touches
 - [ ] Unit test major functions (especially data handling and forecasting)
 - [ ] Add usage instructions to `README.md`
 - [ ] Polish codebase (comments, docstrings, clean structure)

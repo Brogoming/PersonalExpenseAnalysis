@@ -74,3 +74,20 @@ def barChart(ax, originFrame, amountType):
 	ax[0].set_title( f'{amountType} per Month' )
 	ax[0].set_xticks( x + width, labels )
 	ax[0].legend()
+
+def plotNextSixMonths(originFrame, futureDates, predictions):
+	"""
+	Plots out what is predicted for the next 6 months
+	:param originFrame: The original data
+	:param futureDates: The next 6 months
+	:param predictions: Predicted values
+	"""
+	plt.figure( figsize=(10, 5) )
+	plt.plot( originFrame['Dates'], originFrame['Savings Account'], '.-', label='Actual' )
+	plt.plot( futureDates, predictions, '.-', label='Prediction' )
+	plt.legend()
+	plt.xlabel( 'Date' )
+	plt.ylabel( 'Account Total' )
+	plt.title( 'Account Forecast Over Time' )
+	plt.grid( True )
+	plt.show()

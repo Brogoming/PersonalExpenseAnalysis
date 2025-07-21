@@ -1,6 +1,7 @@
 import pandas as pd
 import os
 from formatData import cleanData, getExpenses, getEarnedData, getSpentData
+from linearPredictions import predictNextSixMonths
 from plotData import pieBar, plotAccounts
 
 pd.set_option('display.max_rows', None)        # Show all rows
@@ -29,10 +30,14 @@ def promptForDataFile():
     return os.path.join(dataDir, dataFiles[int(userInput)])
 
 def plotOptions(originFrame):
-    print('\nPlot Data: \nAccounts Overtime = 0\nIncome Overtime = 1\nSpent Overtime = 2')
+    """
+    Prompts the user for options to view the data
+    :param originFrame: The frame where the imported data is coming from
+    """
+    print('\nPlot Data: \nAccounts Overtime = 0\nIncome Overtime = 1\nSpent Overtime = 2\nPredict next month\'s expenses = 3')
     userInput = input( 'Type index number: ' )
 
-    while not userInput.isdigit() or not (0 <= int( userInput ) < 3):
+    while not userInput.isdigit() or not (0 <= int( userInput ) < 4):
         userInput = input( f'Invalid Response, try again: ' )
 
     userInput = int(userInput)
@@ -46,13 +51,16 @@ def plotOptions(originFrame):
         elif userInput == 2:  # Spent Overtime
             spentData = getSpentData(originFrame) # formats and cleans the spent table
             pieBar( spentData, 'Spent' )
+        elif userInput == 3: # Predictions
+            expenses = getExpenses( originFrame )  # formats and cleans the expenses table
+            predictNextSixMonths(expenses)
+            pass
     except Exception as e:
         print( f"Failed to load and plot the data: {e}" )
 
 def main():
     """
     Runs the main process
-    :return: void
     """
     while True:
         fileName = promptForDataFile()
