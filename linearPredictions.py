@@ -8,13 +8,19 @@ def predictNextSixMonths(originFrame):
 	:param originFrame: Frame to get predictions
 	"""
 	originFrame['Timestamp'] = pd.to_datetime( originFrame['Dates'] ).astype( 'int64' ) // 10 ** 9
-
-	model = LinearRegression()
-	model.fit( originFrame['Timestamp'].values.reshape( -1, 1 ), originFrame['Savings Account'].values )
-
-	# Predict next 31 days
+	allPredictions = []
+	accountColumns = []
 	last_ts = originFrame['Timestamp'].max()
 	futureDates = pd.date_range( start=pd.to_datetime( last_ts, unit='s' ) + pd.Timedelta( days=1 ), periods=182, freq='D' )
 	futureTimestamps = futureDates.astype( 'int64' ) // 10 ** 9
-	predictions = model.predict( futureTimestamps.values.reshape( -1, 1 ) )
-	plotNextSixMonths(originFrame, futureDates, predictions)
+
+	for column in originFrame.columns.tolist():
+		if 'Account' in column:
+			model = LinearRegression()
+			model.fit( originFrame['Timestamp'].values.reshape( -1, 1 ), originFrame[column].values )
+
+			# Predict next 31 days
+			predictions = model.predict( futureTimestamps.values.reshape( -1, 1 ) )
+			allPredictions.append(predictions)
+			accountColumns.append(column)
+	plotNextSixMonths(originFrame, futureDates, allPredictions, accountColumns)
