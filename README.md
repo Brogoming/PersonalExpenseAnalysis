@@ -4,7 +4,7 @@ The purpose of this project is to empower individuals to take control of their f
 Whether you're budgeting for the first time or trying to improve your financial health, this tool helps you visualize spending patterns, forecast future spending, and identify areas where you can save.
 
 ![Python Version](https://img.shields.io/badge/python-3.12-blue)
-![Project Started](https://img.shields.io/badge/last%20updated-July%207%2C%202025-orange)
+![Project Started](https://img.shields.io/badge/Project%20Started-July%207%2C%202025-orange)
 
 ## 📌 Milestones
 

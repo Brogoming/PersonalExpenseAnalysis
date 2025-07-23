@@ -2,7 +2,7 @@ import pandas as pd
 import os
 from formatData import cleanData, getExpenses, getEarnedData, getSpentData
 from linearPredictions import predictNextSixMonths
-from plotData import pieBar, plotAccounts
+from plotData import pieBar
 
 pd.set_option('display.max_rows', None)        # Show all rows
 pd.set_option('display.max_columns', None)     # Show all columns
@@ -34,7 +34,7 @@ def plotOptions(originFrame):
     Prompts the user for options to view the data
     :param originFrame: The frame where the imported data is coming from
     """
-    print('\nPlot Data: \nAccounts Overtime = 0\nIncome Overtime = 1\nSpent Overtime = 2\nPredict next month\'s expenses = 3')
+    print('\nPlot Data: \nAccounts Overtime = 0\nIncome Overtime = 1\nSpent Overtime = 2')
     userInput = input( 'Type index number: ' )
 
     while not userInput.isdigit() or not (0 <= int( userInput ) < 4):
@@ -44,17 +44,13 @@ def plotOptions(originFrame):
     try:
         if userInput == 0:  # Accounts Overtime
             expenses = getExpenses( originFrame )  # formats and cleans the expenses table
-            plotAccounts( expenses )
+            predictNextSixMonths( expenses )
         elif userInput == 1:  # Income Overtime
             earnedDate = getEarnedData(originFrame) # formats and cleans the income table
             pieBar( earnedDate, 'Income' )
         elif userInput == 2:  # Spent Overtime
             spentData = getSpentData(originFrame) # formats and cleans the spent table
             pieBar( spentData, 'Spent' )
-        elif userInput == 3: # Predictions
-            expenses = getExpenses( originFrame )  # formats and cleans the expenses table
-            predictNextSixMonths(expenses)
-            pass
     except Exception as e:
         print( f"Failed to load and plot the data: {e}" )
 

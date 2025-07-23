@@ -2,23 +2,6 @@ import matplotlib.pyplot as plt
 import matplotlib.dates as mdates
 import numpy as np
 
-def plotAccounts(originFrame):
-	fig, ax = plt.subplots(figsize=(10,5))
-	for column in originFrame.columns.tolist():
-		if 'Account' in column:
-			ax.plot(originFrame['Dates'], originFrame[column], '.-',label=column)
-
-	ax.xaxis.set_major_locator( mdates.MonthLocator() )
-	ax.xaxis.set_major_formatter( mdates.DateFormatter( '%b %Y' ) )
-	fig.autofmt_xdate()
-
-	plt.title('Accounts Overtime')
-	plt.xlabel('Dates')
-	plt.ylabel('Amount (usd)')
-
-	plt.legend()
-	plt.show()
-
 def pieBar(originFrame, amountType):
 	"""
 	Shows both a pie chart and a bar chart in one panel
@@ -87,9 +70,14 @@ def plotNextSixMonths(originFrame, futureDates, allPredictions, accountColumns):
 	for i, column in enumerate(accountColumns):
 		ax.plot( originFrame['Dates'], originFrame[column], '.-', label=f'{column} Actual' )
 		ax.plot( futureDates, allPredictions[i], '.-', label=f'{column} Prediction' )
+
+	ax.xaxis.set_major_locator( mdates.MonthLocator() )
+	ax.xaxis.set_major_formatter( mdates.DateFormatter( '%b %Y' ) )
+	fig.autofmt_xdate()
+
 	plt.legend()
 	plt.xlabel( 'Date' )
-	plt.ylabel( f'Account Total' )
+	plt.ylabel('Amount (usd)')
 	plt.title( f'Account Forecast Over Time' )
 	plt.grid( True )
 	plt.show()
