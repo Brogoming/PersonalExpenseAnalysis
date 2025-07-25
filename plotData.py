@@ -2,15 +2,14 @@ import matplotlib.pyplot as plt
 import matplotlib.dates as mdates
 import numpy as np
 
-def pieBar(originFrame, amountType):
+def pieBar(originFrame, amountType, ax, fig):
 	"""
 	Shows both a pie chart and a bar chart in one panel
 	:param originFrame: Data to plot
 	:param amountType: Name of the data being plotted
 	:return: void
 	"""
-	fig, ax = plt.subplots(1,2, layout='constrained', figsize=(15,8))
-	barChart(ax, originFrame, amountType)
+	barChart( ax, originFrame, amountType )
 	pieChart( ax, originFrame, amountType )
 
 	plt.show()
@@ -58,26 +57,26 @@ def barChart(ax, originFrame, amountType):
 	ax[0].set_xticks( x + width, labels )
 	ax[0].legend()
 
-def plotNextSixMonths(originFrame, futureDates, allPredictions, accountColumns):
+def plotNextSixMonths(originFrame, futureDates, allPredictions, accountColumns, ax, fig):
 	"""
 	Plots out what is predicted for the next 6 months
+	:param ax:
+	:param fig:
 	:param originFrame: The original data
 	:param futureDates: The next 6 months
 	:param allPredictions: All predicted values
 	:param accountColumns: column names of the accounts
 	"""
-	fig, ax = plt.subplots(figsize=(10, 5))
 	for i, column in enumerate(accountColumns):
-		ax.plot( originFrame['Dates'], originFrame[column], '.-', label=f'{column} Actual' )
-		ax.plot( futureDates, allPredictions[i], '.-', label=f'{column} Prediction' )
+		ax[0].plot( originFrame['Dates'], originFrame[column], '.-', label=f'{column} Actual' )
+		ax[0].plot( futureDates, allPredictions[i], '.-', label=f'{column} Prediction' )
 
-	ax.xaxis.set_major_locator( mdates.MonthLocator() )
-	ax.xaxis.set_major_formatter( mdates.DateFormatter( '%b %Y' ) )
+	ax[0].xaxis.set_major_locator( mdates.MonthLocator() )
+	ax[0].xaxis.set_major_formatter( mdates.DateFormatter( '%b %Y' ) )
 	fig.autofmt_xdate()
 
-	plt.legend()
-	plt.xlabel( 'Date' )
-	plt.ylabel('Amount (usd)')
-	plt.title( f'Account Forecast Over Time' )
-	plt.grid( True )
-	plt.show()
+	ax[0].legend()
+	ax[0].set_xlabel( 'Date' )
+	ax[0].set_ylabel('Amount (usd)')
+	ax[0].set_title( f'Account Forecast Over Time' )
+	ax[0].grid( True )

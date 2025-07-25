@@ -1,83 +1,118 @@
-import pandas as pd
+from tkinter import *
+from tkinter import filedialog
+from tkinter.ttk import Combobox
+from pathlib import Path
+import shutil
 import os
+import pandas as pd
+import matplotlib.pyplot as plt
+from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg
 from formatData import cleanData, getExpenses, getEarnedData, getSpentData
 from linearPredictions import predictNextSixMonths
-from plotData import pieBar
+from plotData import plotNextSixMonths, pieBar
 
-pd.set_option('display.max_rows', None)        # Show all rows
-pd.set_option('display.max_columns', None)     # Show all columns
-pd.set_option('display.width', None)           # Don't wrap lines
-pd.set_option('display.max_colwidth', None)    # Show full content in cells
+uploadedFilePath = ''
+selectedFile = ''
+accountOptions = []
+graphCanvas = None  # Global variable to store current canvas
 
-dataDir = './data'
+def plotGraphs(expensesFile):
+    global graphCanvas
 
-def promptForDataFile():
-    """
-    Prompts the user for the file they want analyzed
-    :return: the correct file path
-    """
-    all_entries = os.listdir(dataDir)
+    if graphCanvas:
+        graphCanvas.get_tk_widget().destroy()
 
-    dataFiles = [entry for entry in all_entries if os.path.isfile(os.path.join(dataDir, entry))]
-    print('What file do you want to analyze?')
-    for i, fileName in enumerate( dataFiles ):
-        print( f'{i}: {fileName}' )
-    userInput = input(f'Type index number: ')
+    fig, ax = plt.subplots(3,2, layout='constrained', figsize=(7,7))
 
-    while not userInput.isdigit() or not (0 <= int(userInput) < len(dataFiles)):
-        userInput = input(f'Invalid Response, try again: ')
+    # Account totals
+    expenses = getExpenses(expensesFile)  # formats and cleans the expenses table
+    [expenses, futureDates, allPredictions, accountColumns] = predictNextSixMonths(expenses)
+    plotNextSixMonths(expenses, futureDates, allPredictions, accountColumns, ax, fig)
 
-    return os.path.join(dataDir, dataFiles[int(userInput)])
+    # TODO fix the other graphs
+    # Spent Graph
+    spentData = getSpentData(expensesFile)  # formats and cleans the spent table
+    pieBar(spentData, 'Spent', ax, fig)
 
-def plotOptions(originFrame):
-    """
-    Prompts the user for options to view the data
-    :param originFrame: The frame where the imported data is coming from
-    """
-    print('\nPlot Data: \nAccounts Overtime = 0\nIncome Overtime = 1\nSpent Overtime = 2')
-    userInput = input( 'Type index number: ' )
+    # Earned Graph
+    earnedDate = getEarnedData(expensesFile)  # formats and cleans the income table
+    pieBar(earnedDate, 'Income', ax, fig)
 
-    while not userInput.isdigit() or not (0 <= int( userInput ) < 4):
-        userInput = input( f'Invalid Response, try again: ' )
+    graphCanvas = FigureCanvasTkAgg(fig, master=root)
+    graphCanvas.draw()
+    graphCanvas.get_tk_widget().grid(row=3, column=0, columnspan=5, padx=5, pady=5)
+    root.update_idletasks()
 
-    userInput = int(userInput)
-    try:
-        if userInput == 0:  # Accounts Overtime
-            expenses = getExpenses( originFrame )  # formats and cleans the expenses table
-            predictNextSixMonths( expenses )
-        elif userInput == 1:  # Income Overtime
-            earnedDate = getEarnedData(originFrame) # formats and cleans the income table
-            pieBar( earnedDate, 'Income' )
-        elif userInput == 2:  # Spent Overtime
-            spentData = getSpentData(originFrame) # formats and cleans the spent table
-            pieBar( spentData, 'Spent' )
-    except Exception as e:
-        print( f"Failed to load and plot the data: {e}" )
-
-def main():
-    """
-    Runs the main process
-    """
-    while True:
-        fileName = promptForDataFile()
-
+def uploadFile():
+    global uploadedFilePath
+    global selectedFile
+    uploadedFilePath = filedialog.askopenfilename( title="Select a file",filetypes=[("CSV Files", "*.csv")] )
+    if uploadedFilePath:
+        print( "Uploaded file:", uploadedFilePath )
         try:
-            expensesFile = pd.read_csv( fileName, engine = 'pyarrow', dtype_backend = 'pyarrow' )
-            expensesFile['Dates'] = pd.to_datetime( expensesFile['Dates']).dt.date
-            expensesFile = cleanData( expensesFile )
+            # Copy the file
+            shutil.copy(uploadedFilePath, './data')
+            print(f"File '{os.path.basename(uploadedFilePath)}' copied successfully to './data'")
+        except FileNotFoundError:
+            print(f"Error: Source file '{uploadedFilePath}' not found.")
         except Exception as e:
-            print( f"Failed to load and clean file: {e}" )
-            continue
+            print(f"An error occurred: {e}")
+        selectedFile = f'./data/{os.path.basename(uploadedFilePath)}'
+    root.update_idletasks()
 
-        plotOptions(expensesFile)
+def selectFileFnc(*args):
+    global selectedFile, accountOptions
+    selectedFile = selectFileBox.get()
+    if '.csv' in selectedFile:
+        try:
+            expensesFile = pd.read_csv(f'./data/{selectedFile}', engine='pyarrow', dtype_backend='pyarrow')
+            expensesFile['Dates'] = pd.to_datetime(expensesFile['Dates']).dt.date
+            expensesFile = cleanData(expensesFile)
+            accountOptions = expensesFile['Location'].drop_duplicates().tolist()
+            if len(accountOptions) > 0:
+                plotGraphs(expensesFile)
+                selectAccountBox.configure(state='active', values=accountOptions)
+                root.update_idletasks()
+        except Exception as e:
+            print(f"Failed to load and clean file: {e}")
 
-        userInput = input('\nDo you want to analyze another file (yes/no)? ').lower()
-        while userInput not in ['yes', 'no']:
-            userInput = input(f'Invalid Response, try again: ')
+def selectAccountFnc(*args):
+    account = selectAccountBox.get()
+    if account != '':
+        amountEntry.configure(state='normal')
 
-        if 'no' == userInput:
-            print('Have a nice day!')
-            break
+root = Tk()
+root.title("Personal Expense Analysis")
+root.geometry('800x900')
 
-if __name__ == "__main__":
-    main()
+Button(root, text='Upload File', border=4, bg='red', command=uploadFile).grid(row=0, column=0, sticky = 'E', padx = 2, pady =2)
+Label(root, text='Select File:').grid(row=1, column=0, sticky = 'E', padx = 2, pady =2)
+Label(root, text='Account:').grid(row=0, column=3, sticky = 'E', padx = 2, pady =2)
+Label(root, text='Amount:').grid(row=1, column=3, sticky = 'E', padx = 2, pady =2)
+
+currentDir = Path(__file__).parent
+dataDir = currentDir / 'data'
+dataDir.mkdir(exist_ok=True)  # Make sure the folder exists
+
+fileList = [f.name for f in dataDir.glob('*.csv')]
+selectFileBox = Combobox(root, values=fileList)
+selectFileBox.set("")
+selectFileBox.bind("<<ComboboxSelected>>", selectFileFnc)
+
+selectAccountBox = Combobox(root, values=accountOptions, state='disabled')
+selectAccountBox.set("")
+selectAccountBox.bind("<<ComboboxSelected>>", selectAccountFnc)
+
+amountVar = IntVar(name="amountVar")
+# messageVar.trace_add("write", disableDecoder)
+amountEntry = Entry(root, width=20, textvariable=amountVar, state='disabled')
+
+# Place widgets
+selectFileBox.grid(row=1, column=1, sticky = 'W', padx = 2, pady =2)
+selectAccountBox.grid(row=0, column=4, sticky = 'W', padx = 2, pady =2)
+amountEntry.grid(row=1, column=4, sticky = 'W', padx = 2, pady =2)
+
+Frame(root, height=60, width=1, relief='sunken', bg='black').grid(row=0, column=2, rowspan=2)
+Frame(root, height=1, width=800, bd=1, relief='sunken', bg='black').grid(row=2, column=0, columnspan=5)
+
+root.mainloop()

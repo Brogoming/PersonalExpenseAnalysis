@@ -23,4 +23,6 @@ def predictNextSixMonths(originFrame):
 			predictions = model.predict( futureTimestamps.values.reshape( -1, 1 ) )
 			allPredictions.append(predictions)
 			accountColumns.append(column)
-	plotNextSixMonths(originFrame, futureDates, allPredictions, accountColumns)
+
+	return [originFrame, futureDates, allPredictions, accountColumns]
+
