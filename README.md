@@ -25,12 +25,15 @@ Whether you're budgeting for the first time or trying to improve your financial 
 - [x] Bar chart comparing months/categories for spending and income
 
 ### 🔮 Milestone 4: Expense Forecasting
-- [x] Use moving averages or linear regression to predict next month’s expenses
+- [x] Use moving averages or linear regression to predict next 6 months' expenses
 
 ### 💾 Milestone 5: User Interface & Experience
-- [ ] Build a simple CLI or GUI (e.g., Streamlit or Tkinter)
-- [ ] Allow importing new data without overwriting old analysis
-- [ ] Add export to PDF or CSV for reports
+- [X] Build a simple CLI or GUI (e.g., Streamlit or Tkinter)
+- [X] Allow importing new data without overwriting old analysis
+- [ ] Be able to save the graphs to a PDF file
+- [ ] Make the original table tab editable
+- [ ] Be able to close file tabs
+- [ ] User can hover over a data point and tells them the exact value
 
 ### 🧪 Milestone 6: Testing and Final Touches
 - [ ] Unit test major functions (especially data handling and forecasting)
