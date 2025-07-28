@@ -62,7 +62,6 @@ def categoryTabs(tabFrame, uploadedFilePath):
 
     root.update_idletasks()
 
-
 def addFilePath():
     """
     Add a file tab for every file imported. This then creates our category tabs for each file

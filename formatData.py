@@ -59,30 +59,27 @@ def getExpenses(originDataFrame):
 
 def getAmountData(originDataFrame, amountType):
     """
-    Sorts the data by the amount type
-    :param originDataFrame: Original data frame before any edits
-    :param amountType: Either Spent or Earned
-    :return: A new data frame of the amount type
+    Groups the data by date and optional tag, then pivots to a format
+    where each tag is a column and rows are by date.
     """
-    newFrame = pd.DataFrame( { 'Dates': pd.to_datetime(originDataFrame['Dates']).drop_duplicates() } )
-    optionalTags = originDataFrame[originDataFrame['Tag'] == amountType]['Optional Tag'].drop_duplicates()
-    for tag in optionalTags:
-        newFrame[tag] = np.where((originDataFrame['Tag'] == amountType) & (originDataFrame['Optional Tag'] == tag), originDataFrame['Amount'], 0 )
-    return getMonthTotals(newFrame)
+    filteredFrame = originDataFrame[originDataFrame['Tag'] == amountType].copy()
+    filteredFrame['Dates'] = pd.to_datetime(filteredFrame['Dates'])
+    grouped = filteredFrame.groupby(['Dates', 'Optional Tag'])['Amount'].sum().reset_index() # Group by date and tag, summing the amount
+    pivoted = grouped.pivot(index='Dates', columns='Optional Tag', values='Amount').fillna(0) # Pivot the table so each tag becomes its own column
+    pivoted = pivoted.reset_index()
+    return getMonthTotals( pivoted )
 
 def getMonthTotals(originDataFrame):
     """
-    Gets the totals of each column per month
-    :param originDataFrame: Original data frame before any edits
-    :return: A new dataframe with the sum value of amounts per month
+    Aggregates total of each amount column by month.
+    :param originDataFrame: DataFrame with 'Dates' column and amount columns
+    :return: DataFrame with month names and column totals
     """
-    newFrame = pd.DataFrame( { 'Months': pd.to_datetime(originDataFrame['Dates']).dt.month.drop_duplicates().sort_values().reset_index( drop=True ) } )
-    for column in originDataFrame.columns.tolist():
-        if column != 'Dates':
-            newColumn = originDataFrame.groupby( pd.to_datetime( originDataFrame['Dates'] ).dt.month )[column].sum()
-            newFrame = pd.merge( newFrame, newColumn, left_on='Months', right_on='Dates', how='left' )
-    newFrame['Months'] = newFrame['Months'].apply( lambda x: cal.month_abbr[x] )
-    return newFrame.reset_index( drop=True )
+    originDataFrame['Month'] = pd.to_datetime(originDataFrame['Dates']).dt.month
+    grouped = originDataFrame.drop(columns=['Dates']).groupby('Month').sum().reset_index() # Group by Month and sum all other columns (exclude 'Dates')
+    grouped['Month'] = grouped['Month'].apply(lambda x: cal.month_abbr[x])
+    grouped = grouped.rename(columns={'Month': 'Months'}) # Rename for clarity
+    return grouped
 
 def predictNextSixMonths(originDataFrame):
     """
