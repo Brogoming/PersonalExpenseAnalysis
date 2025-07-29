@@ -86,23 +86,23 @@ def barChart(originDataFrame, amountType, ax):
 	:param ax: One of the axes to add the frame to
 	"""
 	labels=originDataFrame['Months']
-	x=np.arange(len(labels))  # the label locations
+	xLocs=np.arange(len(labels))  # the label locations
 	width=1 / len(originDataFrame.columns.tolist())  # the width of the bars
 	multiplier=0
 
 	for column in originDataFrame.columns.tolist():
 		if column != 'Months':
 			offset=width * multiplier
-			rects=ax.bar(x + offset, abs(originDataFrame[column]), width, label=column)
-			ax.bar_label(rects, padding=3, fmt=lambda x: f'${x:1.2f}')
+			ax.bar(xLocs + offset, abs(originDataFrame[column]), width, label=column)
 			multiplier+=1
 
 	ax.set_ylabel('Amounts (usd)')
 	ax.yaxis.set_major_formatter('${x:1.2f}')
 	ax.set_title(f'{amountType} per Month')
-	ax.set_xticks(x + width, labels)
+	ax.set_xticks(xLocs + width, labels)
 	ax.grid(True)
 	ax.legend()
+	mplcursors.cursor(ax, hover=True)
 
 def plotNextSixMonths(originDataFrame, futureDates, allPredictions, accountColumns, masterFrame):
 	"""
@@ -136,4 +136,4 @@ def plotNextSixMonths(originDataFrame, futureDates, allPredictions, accountColum
 	canvas=FigureCanvasTkAgg(fig, master=masterFrame)
 	canvas.draw()
 	canvas.get_tk_widget().pack(expand=True, fill="both")
-	mplcursors.cursor(hover=True)
+	mplcursors.cursor(ax, hover=True)

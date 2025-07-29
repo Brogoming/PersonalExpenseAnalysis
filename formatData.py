@@ -38,12 +38,12 @@ def getExpenses(originDataFrame):
 	newFrame=pd.concat([newFrame, missingDates]).sort_values('Dates').reset_index(drop=True)
 
 	tags=['Earned', 'Spent', 'Transfer']
-	locations=originDataFrame['Location'].drop_duplicates()
+	locations=originDataFrame['Account'].drop_duplicates()
 
 	for tag in tags:
 		for location in locations:
 			col=f'{location} {tag}'
-			originDataFrame[col]=np.where((originDataFrame['Tag'] == tag) & (originDataFrame['Location'] == location), originDataFrame['Amount'], 0)
+			originDataFrame[col]=np.where((originDataFrame['Tag'] == tag) & (originDataFrame['Account'] == location), originDataFrame['Amount'], 0)
 			grouped=originDataFrame.groupby('Dates')[col].sum().reset_index()
 			newFrame=newFrame.merge(grouped, on='Dates', how='left')
 
@@ -51,7 +51,7 @@ def getExpenses(originDataFrame):
 	newFrame=newFrame.fillna(0)
 
 	# Account totals per date
-	for location in originDataFrame['Location'].drop_duplicates().tolist():
+	for location in originDataFrame['Account'].drop_duplicates().tolist():
 		newFrame[f'{location} Account']=newFrame[f'{location} Earned'].cumsum() + newFrame[f'{location} Spent'].cumsum() + newFrame[f'{location} Transfer'].cumsum()
 
 	return newFrame

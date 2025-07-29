@@ -55,7 +55,7 @@ def categoryTabs(tabFrame, uploadedFilePath):
 	expenses, futureDates, allPredictions, accountColumns=predictNextSixMonths(expenses)
 	createTab(cateTabs, 'Accounts Overview', plotNextSixMonths, expenses, futureDates, allPredictions, accountColumns)
 
-	# Spent and Earned Tabs (DRY loop)
+	# Spent and Earned Tabs
 	for label in ['Spent', 'Earned']:
 		amountData=getAmountData(expensesFile, label)
 		createTab(cateTabs, f'{label} Overview', barPieCharts, amountData, label)
@@ -71,13 +71,16 @@ def addFilePath():
 		return
 
 	fileName=os.path.basename(uploadedFilePath)
-	existing_tabs=[fileTabs.tab(tabId, "text") for tabId in fileTabs.tabs()]
+	existingTabs=[fileTabs.tab(tabId, "text") for tabId in fileTabs.tabs()]
 
-	if fileName in existing_tabs:
+	if fileName in existingTabs:
 		print(f"Tab '{fileName}' already exists.")
 		return
 
 	tabFrame=Frame(fileTabs)
+	closeButton=ttk.Button(tabFrame, text="x", command=lambda: fileTabs.forget(tabFrame))
+	closeButton.pack(anchor='nw')
+
 	fileTabs.add(tabFrame, text=fileName)
 	categoryTabs(tabFrame, uploadedFilePath)
 	root.update_idletasks()
