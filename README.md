@@ -50,6 +50,7 @@ spending patterns, forecast future spending, and identify areas where you can sa
 - [ ] Unit test major functions (especially data handling and forecasting)
 - [ ] Add usage instructions to `README.md`
 - [ ] Polish codebase (comments, docstrings, clean structure)
+- [ ] Make this into a .exe file
 
 # Developers:
 
