@@ -40,14 +40,10 @@ spending patterns, forecast future spending, and identify areas where you can sa
 
 - [X] Build a simple CLI or GUI (e.g., Streamlit or Tkinter)
 - [X] Allow importing new data without overwriting old analysis
-- [ ] Be able to save the graphs and tables to a PDF file
-- [ ] Make the original table tab editable
-- [ ] Be able to close file tabs
 - [X] User can hover over a data point and tells them the exact value
 
 ### 🧪 Milestone 6: Testing and Final Touches
 
-- [ ] Unit test major functions (especially data handling and forecasting)
 - [ ] Add usage instructions to `README.md`
 - [ ] Polish codebase (comments, docstrings, clean structure)
 - [ ] Make this into a .exe file

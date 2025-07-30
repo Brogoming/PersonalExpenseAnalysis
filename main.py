@@ -78,8 +78,6 @@ def addFilePath():
 		return
 
 	tabFrame=Frame(fileTabs)
-	closeButton=ttk.Button(tabFrame, text="x", command=lambda: fileTabs.forget(tabFrame))
-	closeButton.pack(anchor='nw')
 
 	fileTabs.add(tabFrame, text=fileName)
 	categoryTabs(tabFrame, uploadedFilePath)
