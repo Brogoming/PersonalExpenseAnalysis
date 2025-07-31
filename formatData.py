@@ -31,9 +31,9 @@ def getExpenses(originDataFrame):
 	newFrame=pd.DataFrame({'Dates': originDataFrame['Dates'].drop_duplicates().reset_index(drop=True)})
 
 	# Get missing dates
-	startYear=pd.to_datetime(originDataFrame["Dates"]).dt.year[0]  # gets the year the data started
-	endYear=pd.to_datetime(originDataFrame["Dates"]).dt.year[len(originDataFrame["Dates"]) - 1]  # gets the year the data ended
-	missingDates=pd.DataFrame({'Dates': pd.date_range(f'01-01-{startYear}', f'12-31-{endYear}').difference(newFrame['Dates'])})
+	startDate=pd.to_datetime(originDataFrame["Dates"]).dt.date[0]  # gets the year the data started
+	endDate=pd.to_datetime(originDataFrame["Dates"]).dt.date[len(originDataFrame["Dates"]) - 1]  # gets the year the data ended
+	missingDates=pd.DataFrame({'Dates': pd.date_range(startDate, endDate).difference(newFrame['Dates'])})
 	missingDates['Dates']=pd.to_datetime(missingDates['Dates']).dt.date
 	newFrame=pd.concat([newFrame, missingDates]).sort_values('Dates').reset_index(drop=True)
 
