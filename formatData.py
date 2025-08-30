@@ -13,11 +13,11 @@ def cleanData(originDataFrame):
 
 	for i in cleanFrame.columns.tolist():
 		if pd.api.types.is_numeric_dtype(cleanFrame[i]):
-			cleanFrame[i]=cleanFrame[i].fillna(0)
+			cleanFrame[i]=cleanFrame[i].fillna(0.0)
 		else:
 			cleanFrame[i]=cleanFrame[i].fillna('Unknown')
 
-	cleanFrame['Amount']=originDataFrame['Amount']
+	cleanFrame['Amount']=originDataFrame['Amount'].str.replace(',', '', regex=False).replace('$', '', regex=False).astype(float)
 	cleanFrame['Amount']=np.where(originDataFrame['Tag'] == 'Spent', -abs(cleanFrame['Amount']), cleanFrame['Amount'])
 	cleanFrame['Amount']=np.where(originDataFrame['Tag'] == 'Earned', abs(cleanFrame['Amount']), cleanFrame['Amount'])
 	return cleanFrame

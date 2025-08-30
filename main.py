@@ -80,6 +80,7 @@ def addFilePath():
 	tabFrame=Frame(fileTabs)
 
 	fileTabs.add(tabFrame, text=fileName)
+	print(uploadedFilePath)
 	categoryTabs(tabFrame, uploadedFilePath)
 	root.update_idletasks()
 
